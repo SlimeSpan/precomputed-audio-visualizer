@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="AudioProcessing.Core/AudioProcessing.Core.csproj" Id="675af03b-2f92-4e14-b1c4-f8106a10cc32" />
+  <Project Path="Filter.Core/Filter.Core.csproj" Id="02a79b53-1c28-4712-946d-88c0c3c2d99f" />
+  <Project Path="SignalVisualizer.Core/SignalVisualizer.Core.csproj" Id="273be5e1-83d3-4eba-be09-ec4902796592" />
+  <Project Path="SoundVisualization/sound visualization.csproj" />
+</Solution>
