@@ -9,4 +9,7 @@ FFT spectrum analysis
 Dynamic color gradients
 Bar / Waveform visualization
 Mel-scale frequency band segmentation
+
+
+
 ![demo](image/preview.png)
