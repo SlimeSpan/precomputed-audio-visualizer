@@ -51,6 +51,8 @@ namespace sound_visualization
                 using (LinearGradientBrush brush = new LinearGradientBrush(new PointF(0, screenBottom),new PointF(0, bound.Top), c0, c1))
                 {
                     g.FillPath(brush, _path);
+                  
+                   
                 }
 
             }

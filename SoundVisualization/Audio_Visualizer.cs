@@ -2,9 +2,7 @@
 using AudioProcessing.Core;
 using Filter.Core;
 using SignalVisualizer.Core;
-using System.Drawing.Drawing2D;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using WindowsManager;
 
 
 namespace sound_visualization
@@ -19,12 +17,11 @@ namespace sound_visualization
 
         private readonly AudioPlayer _AudioPlayer;
 
-        WinformControl control;
+        WinformControl _control;
 
-        readonly RenderChannel<RectangleF> _rectangelRender;
-        readonly RenderChannel<PointF> _curveRender;
+        RenderChannel<RectangleF>? _rectangelRender;
+        RenderChannel<PointF>? _curveRender;
 
-        readonly RectangleDataVisualizer _rectDataCalc;
 
 
         private readonly Color[] _colors;
@@ -38,9 +35,30 @@ namespace sound_visualization
 
             _processor = new AudioToData(fftWindowSize: 2048, bandCount: 128);
 
-            _rectDataCalc = new RectangleDataVisualizer(this.ClientSize.Height, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount, 0.6f);
+            _filter = new LowPassFilter(0.3f, _processor.BandCount);
+
+            _AudioPlayer = new AudioPlayer(AudioPlayer.AudioPlayerLatency.DefaultLatency);
+
+            
+
+            _control = new WinformControl();
+            InitializeVisualizerChannels(_control);
+
+            _colors = GetColors();
+
+
+            InitializeNotifyIcon();
+
+
+        }
+        
+        
+        private void InitializeVisualizerChannels(WinformControl c)
+        {
+            RectangleDataVisualizer _rectDataCalc = new RectangleDataVisualizer(this.ClientSize.Height, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount, 0.6f);
             _rectDataCalc.MinBarWidth = 1;
             _rectDataCalc.MinBarHeight = 1;
+
             PointsDataVisualizer pointDataCalc = new PointsDataVisualizer(this.ClientSize.Height, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount);
 
             DrawRectangles draw = new DrawRectangles();
@@ -49,39 +67,111 @@ namespace sound_visualization
 
             _rectangelRender = new RenderChannel<RectangleF>(_rectDataCalc, draw);
 
-            _curveRender = new RenderChannel<PointF>(pointDataCalc, drawCurve);
-            _curveRender.Enable = false;
-            control = new WinformControl();
-
-            control.AddRenderChannel(_rectangelRender);
-            control.AddRenderChannel(_curveRender);
-
-
-
+            _curveRender = new RenderChannel<PointF>(pointDataCalc, drawCurve) 
+            { 
+                Enable = false 
+            };
+      
+          
+            
 
 
-
-            _filter = new LowPassFilter(0.15f, _processor.BandCount);
-
-            _AudioPlayer = new AudioPlayer(AudioPlayer.AudioPlayerLatency.DefaultLatency);
-
-
-            _colors = GetColors();
+            c.AddRenderChannel(_rectangelRender);
+            c.AddRenderChannel(_curveRender);
 
 
         }
 
 
+        private NotifyIcon? notifyIcon;
+        private ContextMenuStrip? contextMenu;
+        bool _isTransparent = false;
+        private void InitializeNotifyIcon()
+        {
+            notifyIcon = new NotifyIcon();
+            contextMenu = new ContextMenuStrip();
+
+            notifyIcon.DoubleClick += OnShowForm;
+
+            contextMenu.Items.Add("Show/Transparent", null, OnShowMenuItemClick);
+            contextMenu.Items.Add("Exit", null, OnExitMenuItemClick);
+            notifyIcon.ContextMenuStrip = contextMenu;
+            notifyIcon.Icon = this.Icon;
+            notifyIcon.Text = "Audio Visualizer";
+            notifyIcon.Visible = true;
+        }
+        private void OnShowForm(object? sender, EventArgs e)
+        {
+            this.Show();
+           
+        }
+
+        private void OnShowMenuItemClick(object? sender, EventArgs e)
+        {
+
+            IntPtr workerW = WindowManager.FindWorkerW();
+            if (workerW != IntPtr.Zero)
+            {
+                WindowManager.SetParent(this.Handle, workerW);
+            }
+
+            //if (_isTransparent)
+            //{
+            //    DisableTransparent();
+            //    _isTransparent = false;
+            //}
+            //else
+            //{
+            //    EnableTransparent();
+            //    _isTransparent = true;
+            //}
+        }
+        private void EnableTransparent()
+        {
+            
+           
+
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.BackColor = Color.Black;
+            this.TransparencyKey = Color.Black;
+
+            this.ShowInTaskbar = false;
+            
+            this.TopMost = true;
+
+        }
+        private void DisableTransparent()
+        {
+           
+            
+
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.BackColor = SystemColors.Control;
+            this.TransparencyKey = Color.Empty;
+
+            this.ShowInTaskbar = true;
+            this.TopMost = false;
+        }
+
+       
+        private void OnExitMenuItemClick(object? sender, EventArgs e)
+        {
+            this.Close();
+        }
+
 
 
         private void Audio_visulaizer_Load(object sender, EventArgs e)
         {
-            panelMenu.BackColor = Color.Pink;
+            
+
+            panelMenu.BackColor = Color.White;
             panelMenu.Height = this.ClientSize.Height / 6;
             panelMenu.Top = -panelMenu.Height;
 
-
+            
             TriggerPanel.Height = panelMenu.Height;
+
         }
 
 
@@ -151,7 +241,9 @@ namespace sound_visualization
            
             _AudioPlayer.PlayAudio(path);
             _AudioPlayer.Volume = MathF.Pow(volumeBar.Value / 100.0f, 2.2f);
-            
+          
+
+          
             timer.Start();
 
 
@@ -229,7 +321,7 @@ namespace sound_visualization
             _gradientColors[1] = _colors[(_colorIndex + 256) % _colors.Length];
 
 
-            control.SetColor(_gradientColors);
+            _control.SetColor(_gradientColors);
 
 
             Spectrum.Invalidate();
@@ -287,7 +379,7 @@ namespace sound_visualization
 
         private void Spectrum_Resize(object? sender, EventArgs e)
         {
-            control.UpdateSize(Spectrum.ClientSize.Height, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
+            _control.UpdateSize(Spectrum.ClientSize.Height/4, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
             
 
             int targetHeight = (this.ClientSize.Height / 6);
@@ -329,7 +421,7 @@ namespace sound_visualization
             //}
             ReadOnlySpan<float> smoothedData = _filter.Process(NormalizedFrameData.AsSpan(_currentFrame * _bandCount, _bandCount));
 
-            control.UpdateAndDraw(g, smoothedData);
+            _control.UpdateAndDraw(g, smoothedData);
 
         }
 
@@ -424,11 +516,11 @@ namespace sound_visualization
         {
             if (checkBoxRectangle.Checked)
             {
-                _rectangelRender.Enable = true;
+                _rectangelRender?.Enable = true;
             }
             else
             {
-                _rectangelRender.Enable = false;
+                _rectangelRender?.Enable = false;
             }
         }
 
@@ -436,11 +528,11 @@ namespace sound_visualization
         {
             if (checkBoxCurve.Checked)
             {
-                _curveRender.Enable = true;
+                _curveRender?.Enable = true;
             }
             else
             {
-                _curveRender.Enable = false;
+                _curveRender?.Enable = false;
             }
         }
 

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,7 @@
     <ProjectReference Include="..\AudioProcessing.Core\AudioProcessing.Core.csproj" />
     <ProjectReference Include="..\Filter.Core\Filter.Core.csproj" />
     <ProjectReference Include="..\SignalVisualizer.Core\SignalVisualizer.Core.csproj" />
+    <ProjectReference Include="..\WindowsManager\WindowsManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>

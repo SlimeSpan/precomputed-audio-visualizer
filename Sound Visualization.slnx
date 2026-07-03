@@ -3,4 +3,5 @@
   <Project Path="Filter.Core/Filter.Core.csproj" Id="02a79b53-1c28-4712-946d-88c0c3c2d99f" />
   <Project Path="SignalVisualizer.Core/SignalVisualizer.Core.csproj" Id="273be5e1-83d3-4eba-be09-ec4902796592" />
   <Project Path="SoundVisualization/sound visualization.csproj" />
+  <Project Path="WindowsManager/WindowsManager.csproj" Id="7ca66b73-209e-4494-aa02-7b7f8571774d" />
 </Solution>
