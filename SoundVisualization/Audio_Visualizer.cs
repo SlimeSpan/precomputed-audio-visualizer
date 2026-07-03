@@ -28,6 +28,7 @@ namespace sound_visualization
         private readonly Color[] _colors;
 
         private float _maxHeightRatio = 0.25f;
+        private float _filterAlpha = 0.15f;
 
         public Audio_visualizer()
         {
@@ -36,7 +37,7 @@ namespace sound_visualization
 
             _processor = new AudioToData(fftWindowSize: 2048, bandCount: 128);
 
-            _filter = new LowPassFilter(0.3f, _processor.BandCount);
+            _filter = new LowPassFilter(_filterAlpha, _processor.BandCount);
 
 
             _AudioPlayer = new AudioPlayer(AudioPlayer.AudioPlayerLatency.DefaultLatency);
@@ -566,6 +567,16 @@ namespace sound_visualization
         {
             _maxHeightRatio = heightBar.Value / 100.0f;
             _control.UpdateSize(this.ClientSize.Height * _maxHeightRatio, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            _filterAlpha = trackBar1.Value / 100.0f;
+            if (_filter is LowPassFilter lowPassFilter)
+            {
+                lowPassFilter.Alpha = _filterAlpha;
+
+            }
         }
     }
 

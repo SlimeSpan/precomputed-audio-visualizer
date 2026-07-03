@@ -13,7 +13,7 @@ namespace Filter.Core
             set
             {
                 Debug.Assert(_alpha>=0f|| _alpha<=1f, "illegal alpha value");
-                Math.Clamp(value, 0f, 1f);
+                _alpha = Math.Clamp(value, 0f, 1f);
             }
         }
        

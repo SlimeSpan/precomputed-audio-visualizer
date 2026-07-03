@@ -5,7 +5,7 @@ namespace Filter.Core
     public abstract class FilterBase
     {
         protected float[] Buffer;
-
+       
         protected FilterBase(int bandCount) 
         {
             Buffer = new float[bandCount];

@@ -12,7 +12,7 @@ namespace Filter.Core
             set
             {
                 Debug.Assert(value>=0f||value<=1f,"illegal attack value");
-                Math.Clamp(value, 0, 1);
+                _attack = Math.Clamp(value, 0, 1);
             }
                 
         }
@@ -24,7 +24,7 @@ namespace Filter.Core
             set
             {
                 Debug.Assert(value >= 0f || value <= 1f, "illegal decay value");
-                Math.Clamp(value, 0, 1);
+                _release = Math.Clamp(value, 0, 1);
             }
         }
 

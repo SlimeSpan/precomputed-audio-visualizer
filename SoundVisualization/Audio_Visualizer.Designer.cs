@@ -39,18 +39,21 @@
             labelVolume = new Label();
             labelHeight = new Label();
             heightBar = new TrackBar();
-            Spectrum = new SpectrumControl();
             TriggerPanel = new TransparentPanel();
+            Spectrum = new SpectrumControl();
             AnimationTimer = new System.Windows.Forms.Timer(components);
             analyzeB = new Button();
             chooseFileB = new Button();
             textBox1 = new TextBox();
             initialP = new Panel();
+            trackBar1 = new TrackBar();
+            labelFilter = new Label();
             ((System.ComponentModel.ISupportInitialize)volumeBar).BeginInit();
             visualizerP.SuspendLayout();
             panelMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)heightBar).BeginInit();
             initialP.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
             // 
             // closeB
@@ -120,9 +123,11 @@
             // panelMenu
             // 
             panelMenu.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            panelMenu.Controls.Add(labelFilter);
             panelMenu.Controls.Add(labelVolume);
             panelMenu.Controls.Add(labelHeight);
             panelMenu.Controls.Add(closeB);
+            panelMenu.Controls.Add(trackBar1);
             panelMenu.Controls.Add(volumeBar);
             panelMenu.Controls.Add(heightBar);
             panelMenu.Controls.Add(checkBoxCurve);
@@ -164,6 +169,15 @@
             heightBar.Value = 25;
             heightBar.Scroll += heightBar_Scroll;
             // 
+            // TriggerPanel
+            // 
+            TriggerPanel.Dock = DockStyle.Top;
+            TriggerPanel.Location = new Point(0, 0);
+            TriggerPanel.Name = "TriggerPanel";
+            TriggerPanel.Size = new Size(687, 28);
+            TriggerPanel.TabIndex = 4;
+            TriggerPanel.MouseEnter += TriggerPanel_MouseEnter;
+            // 
             // Spectrum
             // 
             Spectrum.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -173,15 +187,6 @@
             Spectrum.TabIndex = 5;
             Spectrum.Render += Spectrum_Render;
             Spectrum.Resize += Spectrum_Resize;
-            // 
-            // TriggerPanel
-            // 
-            TriggerPanel.Dock = DockStyle.Top;
-            TriggerPanel.Location = new Point(0, 0);
-            TriggerPanel.Name = "TriggerPanel";
-            TriggerPanel.Size = new Size(687, 28);
-            TriggerPanel.TabIndex = 4;
-            TriggerPanel.MouseEnter += TriggerPanel_MouseEnter;
             // 
             // AnimationTimer
             // 
@@ -229,13 +234,35 @@
             initialP.Size = new Size(687, 519);
             initialP.TabIndex = 5;
             // 
+            // trackBar1
+            // 
+            trackBar1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            trackBar1.Location = new Point(362, 0);
+            trackBar1.Maximum = 100;
+            trackBar1.Name = "trackBar1";
+            trackBar1.Size = new Size(104, 45);
+            trackBar1.TabIndex = 4;
+            trackBar1.TickStyle = TickStyle.None;
+            trackBar1.Value = 15;
+            trackBar1.Scroll += trackBar1_Scroll;
+            // 
+            // labelFilter
+            // 
+            labelFilter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            labelFilter.AutoSize = true;
+            labelFilter.Location = new Point(391, 28);
+            labelFilter.Name = "labelFilter";
+            labelFilter.Size = new Size(36, 17);
+            labelFilter.TabIndex = 7;
+            labelFilter.Text = "Filter";
+            // 
             // Audio_visualizer
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(687, 519);
-            Controls.Add(initialP);
             Controls.Add(visualizerP);
+            Controls.Add(initialP);
             MinimumSize = new Size(373, 89);
             Name = "Audio_visualizer";
             Text = "Audio_visulaizer";
@@ -248,6 +275,7 @@
             ((System.ComponentModel.ISupportInitialize)heightBar).EndInit();
             initialP.ResumeLayout(false);
             initialP.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
             ResumeLayout(false);
         }
 
@@ -269,5 +297,7 @@
         private Button chooseFileB;
         private TextBox textBox1;
         private Panel initialP;
+        private Label labelFilter;
+        private TrackBar trackBar1;
     }
 }
