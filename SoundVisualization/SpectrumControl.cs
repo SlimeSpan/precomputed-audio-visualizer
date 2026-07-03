@@ -16,7 +16,7 @@ namespace sound_visualization
             ControlStyles.OptimizedDoubleBuffer,
             true);
             this.DoubleBuffered = true;
-            ResizeRedraw = true;
+            ResizeRedraw = false;
         }
         protected override void OnPaint(PaintEventArgs e)
         {

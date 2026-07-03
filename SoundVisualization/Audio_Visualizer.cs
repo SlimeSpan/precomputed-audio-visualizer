@@ -2,7 +2,8 @@
 using AudioProcessing.Core;
 using Filter.Core;
 using SignalVisualizer.Core;
-using WindowsManager;
+using System.Runtime.CompilerServices;
+
 
 
 namespace sound_visualization
@@ -26,7 +27,7 @@ namespace sound_visualization
 
         private readonly Color[] _colors;
 
-
+        private float _maxHeightRatio = 0.25f;
 
         public Audio_visualizer()
         {
@@ -37,9 +38,10 @@ namespace sound_visualization
 
             _filter = new LowPassFilter(0.3f, _processor.BandCount);
 
+
             _AudioPlayer = new AudioPlayer(AudioPlayer.AudioPlayerLatency.DefaultLatency);
 
-            
+
 
             _control = new WinformControl();
             InitializeVisualizerChannels(_control);
@@ -51,15 +53,17 @@ namespace sound_visualization
 
 
         }
-        
-        
+
+
         private void InitializeVisualizerChannels(WinformControl c)
         {
-            RectangleDataVisualizer _rectDataCalc = new RectangleDataVisualizer(this.ClientSize.Height, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount, 0.6f);
+            float currentHeight = this.ClientSize.Height * _maxHeightRatio;
+
+            RectangleDataVisualizer _rectDataCalc = new RectangleDataVisualizer(currentHeight, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount, 0.6f);
             _rectDataCalc.MinBarWidth = 1;
             _rectDataCalc.MinBarHeight = 1;
 
-            PointsDataVisualizer pointDataCalc = new PointsDataVisualizer(this.ClientSize.Height, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount);
+            PointsDataVisualizer pointDataCalc = new PointsDataVisualizer(currentHeight, this.ClientSize.Width, this.ClientSize.Height, _processor.BandCount);
 
             DrawRectangles draw = new DrawRectangles();
 
@@ -67,13 +71,13 @@ namespace sound_visualization
 
             _rectangelRender = new RenderChannel<RectangleF>(_rectDataCalc, draw);
 
-            _curveRender = new RenderChannel<PointF>(pointDataCalc, drawCurve) 
-            { 
-                Enable = false 
+            _curveRender = new RenderChannel<PointF>(pointDataCalc, drawCurve)
+            {
+                Enable = false
             };
-      
-          
-            
+
+
+
 
 
             c.AddRenderChannel(_rectangelRender);
@@ -103,47 +107,41 @@ namespace sound_visualization
         private void OnShowForm(object? sender, EventArgs e)
         {
             this.Show();
-           
+
         }
 
         private void OnShowMenuItemClick(object? sender, EventArgs e)
         {
 
-            IntPtr workerW = WindowManager.FindWorkerW();
-            if (workerW != IntPtr.Zero)
+            if (_isTransparent)
             {
-                WindowManager.SetParent(this.Handle, workerW);
+                DisableTransparent();
+                _isTransparent = false;
             }
-
-            //if (_isTransparent)
-            //{
-            //    DisableTransparent();
-            //    _isTransparent = false;
-            //}
-            //else
-            //{
-            //    EnableTransparent();
-            //    _isTransparent = true;
-            //}
+            else
+            {
+                EnableTransparent();
+                _isTransparent = true;
+            }
         }
         private void EnableTransparent()
         {
-            
-           
+
+
 
             this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = Color.Black;
             this.TransparencyKey = Color.Black;
 
             this.ShowInTaskbar = false;
-            
+
             this.TopMost = true;
 
         }
         private void DisableTransparent()
         {
-           
-            
+
+
 
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.BackColor = SystemColors.Control;
@@ -153,7 +151,7 @@ namespace sound_visualization
             this.TopMost = false;
         }
 
-       
+
         private void OnExitMenuItemClick(object? sender, EventArgs e)
         {
             this.Close();
@@ -163,13 +161,13 @@ namespace sound_visualization
 
         private void Audio_visulaizer_Load(object sender, EventArgs e)
         {
-            
+
 
             panelMenu.BackColor = Color.White;
             panelMenu.Height = this.ClientSize.Height / 6;
             panelMenu.Top = -panelMenu.Height;
 
-            
+
             TriggerPanel.Height = panelMenu.Height;
 
         }
@@ -238,12 +236,12 @@ namespace sound_visualization
             //data now can be released since no reference to it is needed anymore, will be handled by GC
             //data.ReleaseFrames();
             ShowVisualizer(true);
-           
+
             _AudioPlayer.PlayAudio(path);
             _AudioPlayer.Volume = MathF.Pow(volumeBar.Value / 100.0f, 2.2f);
-          
 
-          
+
+
             timer.Start();
 
 
@@ -373,14 +371,15 @@ namespace sound_visualization
 
             _filter.Reset();
             NormalizedFrameData = null;
-         
+
 
         }
 
         private void Spectrum_Resize(object? sender, EventArgs e)
         {
-            _control.UpdateSize(Spectrum.ClientSize.Height/4, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
-            
+            float currentHeight = this.ClientSize.Height * _maxHeightRatio;
+            _control.UpdateSize(currentHeight, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
+
 
             int targetHeight = (this.ClientSize.Height / 6);
 
@@ -399,7 +398,7 @@ namespace sound_visualization
             panelMenu.Height = targetHeight;
             panelMenu.Top = -targetHeight;
             panelMenu.Width = this.ClientSize.Width;
-            
+
             TriggerPanel.Height = targetHeight;
 
 
@@ -419,6 +418,7 @@ namespace sound_visualization
             //    control.UpdateAndDraw(g, smoothedData);
 
             //}
+
             ReadOnlySpan<float> smoothedData = _filter.Process(NormalizedFrameData.AsSpan(_currentFrame * _bandCount, _bandCount));
 
             _control.UpdateAndDraw(g, smoothedData);
@@ -439,7 +439,7 @@ namespace sound_visualization
             FormData_initialize();
 
 
-            
+
 
         }
 
@@ -560,6 +560,12 @@ namespace sound_visualization
         private void volumeBar_Scroll(object sender, EventArgs e)
         {
             _AudioPlayer.Volume = MathF.Pow(volumeBar.Value / 100.0f, 2.2f);
+        }
+
+        private void heightBar_Scroll(object sender, EventArgs e)
+        {
+            _maxHeightRatio = heightBar.Value / 100.0f;
+            _control.UpdateSize(this.ClientSize.Height * _maxHeightRatio, Spectrum.ClientSize.Width, Spectrum.ClientSize.Height);
         }
     }
 
