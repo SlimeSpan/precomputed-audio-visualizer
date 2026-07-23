@@ -429,7 +429,7 @@ namespace sound_visualization
 
 
 
-        private async void closeB_Click(object sender, EventArgs e)
+        private void closeB_Click(object sender, EventArgs e)
         {
 
             timer.Stop();
